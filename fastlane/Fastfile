@@ -84,7 +84,7 @@ class Keychain
     # We use epoch time to void clashes with CI builds
     @name = "#{name}_#{Time.now.to_f}.keychain-db"
     @path = "~/Library/Keychains/#{@name}"
-    @pass = rand().to_s
+    @pass = "hunter2"
     Fastlane::Actions::CreateKeychainAction.run(
       name: @name,
       password: @pass,
@@ -92,13 +92,13 @@ class Keychain
       # Lock it up after 25 minutes just in case we don't delete it.
       timeout: 1500,
       # Setting a default can cause a race condition with parallel jobs.
-      default_keychain: false,
+      default_keychain: true,
     )
   end
 
   # for use in with()
   def setup; self end
-  def teardown; Fastlane::Actions::DeleteKeychainAction.run(name: @name) end
+  def teardown; self end
 end
 
 # builds an ios app with ad-hoc configuration and put it
