@@ -17,6 +17,9 @@
             [status-im.ui.components.tabs :as tabs]
             [status-im.utils.contenthash :as contenthash]
             [status-im.multiaccounts.core :as multiaccounts]
+            [status-im.ui.screens.chat.message.reactions :as reactions]
+            [status-im.chat.models.reactions :as models.reactions]
+            [status-im.ui.screens.chat.components.reply :as components.reply]
             [status-im.ui.screens.chat.message.link-preview :as link-preview]))
 
 (defonce messages-list-ref (atom nil))
@@ -61,44 +64,75 @@
                                           (react/dismiss-keyboard!))}
    [message-content-image (:image content) false]])
 
-(defn message-item [{:keys [content-type content from last-in-group? timestamp identicon outgoing] :as message} timeline? account]
-  [react/view (when last-in-group?
-                {:padding-bottom      8
-                 :margin-bottom       8
-                 :border-bottom-width 1
-                 :border-bottom-color colors/gray-lighter})
-   [react/view {:padding-vertical   8
-                :flex-direction     :row
-                :background-color   (when (and timeline? outgoing) colors/blue-light)
-                :padding-horizontal 16}
-    [react/view {:padding-top 2 :padding-right 8}
-     (if outgoing
-       [photos/member-identicon (multiaccounts/displayed-photo account)]
-       [photos/member-identicon identicon])]
-    [react/view {:flex 1}
-     [react/view {:flex-direction  :row
-                  :justify-content :space-between}
+(defn on-long-press-fn [on-long-press content]
+  (on-long-press
+   [{:on-press #(react/copy-to-clipboard
+                 (components.reply/get-quoted-text-with-mentions
+                  (get content :parsed-text)))
+     :label    (i18n/label :t/sharing-copy-to-clipboard)}]))
+
+(defn message-item [timeline? account]
+  (fn [{:keys [content-type content from timestamp identicon outgoing] :as message} {:keys [modal on-long-press]}]
+    [react/view (merge {:padding-vertical   8
+                        :flex-direction     :row
+                        :background-color   (when (and timeline? outgoing) colors/blue-light)
+                        :padding-horizontal 16}
+                       (when modal
+                         {:border-radius 16
+                          :background-color colors/white}))
+     [react/view {:padding-top 2 :padding-right 8}
       (if outgoing
-        [message/message-my-name {:profile? true :you? false}]
-        [message/message-author-name from {:profile? true}])
-      [react/text {:style {:font-size 10 :color colors/gray}}
-       (datetime/time-ago (datetime/to-date timestamp))]]
-     (if (= content-type constants/content-type-image)
-       [image-message message]
-       [react/view
-        [message/render-parsed-text (assoc message :outgoing false) (:parsed-text content)]
-        [link-preview/link-preview-wrapper (:links content) outgoing]])]]])
+        [photos/member-identicon (multiaccounts/displayed-photo account)]
+        [photos/member-identicon identicon])]
+     [react/view {:flex 1}
+      [react/view {:flex-direction  :row
+                   :justify-content :space-between}
+       (if outgoing
+         [message/message-my-name {:profile? true :you? false}]
+         [message/message-author-name from {:profile? true}])
+       [react/text {:style {:font-size 10 :color colors/gray}}
+        (datetime/time-ago (datetime/to-date timestamp))]]
+      [react/touchable-highlight (when-not modal
+                                   {:on-long-press #(on-long-press-fn on-long-press content)})
+       [react/view (when modal {:background-color colors/white})
+        (if (= content-type constants/content-type-image)
+          [image-message message]
+          [message/render-parsed-text (assoc message :outgoing false) (:parsed-text content)])
+        [link-preview/link-preview-wrapper (:links content) outgoing]]]]]))
 
 (defn render-message [timeline? account]
   (fn [{:keys [type] :as message} idx]
-    (if (= type :datemark)
-      nil
-      (if (= type :gap)
-        (if timeline?
-          nil
-          [gap/gap message idx messages-list-ref])
-        ; message content
-        [message-item message timeline? account]))))
+    [(fn []
+       (if (= type :datemark)
+         nil
+         (if (= type :gap)
+           (if timeline?
+             nil
+             [gap/gap message idx messages-list-ref])
+           ; message content
+           [react/view (when (:last-in-group? message)
+                         {:padding-bottom      8
+                          :margin-bottom       8
+                          :border-bottom-width 1
+                          :border-bottom-color colors/gray-lighter})
+            [reactions/with-reaction-picker
+             {:message         message
+              :timeline        true
+              :reactions       @(re-frame/subscribe [:chats/message-reactions (:message-id message) (:chat-id message)])
+              :picker-on-open  (fn [])
+              :picker-on-close (fn [])
+              :send-emoji      (fn [{:keys [emoji-id]}]
+                                 (re-frame/dispatch [::models.reactions/send-emoji-reaction
+                                                     {:message-id (:message-id message)
+                                                      :chat-id    (:chat-id message)
+                                                      :emoji-id   emoji-id}]))
+              :retract-emoji   (fn [{:keys [emoji-id emoji-reaction-id]}]
+                                 (re-frame/dispatch [::models.reactions/send-emoji-reaction-retraction
+                                                     {:message-id        (:message-id message)
+                                                      :chat-id           (:chat-id message)
+                                                      :emoji-id          emoji-id
+                                                      :emoji-reaction-id emoji-reaction-id}]))
+              :render          (message-item timeline? account)}]])))]))
 
 (def state (reagent/atom {:tab :timeline}))
 

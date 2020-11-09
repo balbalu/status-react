@@ -63,15 +63,15 @@
 
 (fx/defn send-emoji-reaction
   {:events [::send-emoji-reaction]}
-  [{{:keys [current-chat-id] :as db} :db :as cofx} reaction]
+  [{{:keys [current-chat-id]} :db :as cofx} reaction]
   (message.protocol/send-reaction cofx
-                                  (assoc reaction :chat-id current-chat-id)))
+                                  (update reaction :chat-id #(or % current-chat-id))))
 
 (fx/defn send-retract-emoji-reaction
   {:events [::send-emoji-reaction-retraction]}
-  [{{:keys [current-chat-id reactions] :as db} :db :as cofx} reaction]
+  [{{:keys [current-chat-id]} :db :as cofx} reaction]
   (message.protocol/send-retract-reaction cofx
-                                          (assoc reaction :chat-id current-chat-id)))
+                                          (update reaction :chat-id #(or % current-chat-id))))
 
 (fx/defn receive-one
   {:events [::receive-one]}

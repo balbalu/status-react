@@ -18,8 +18,8 @@
 (def translate-x   27)
 (def translate-y   -24)
 
-(defn picker [{:keys [outgoing actions own-reactions on-close send-emoji]}]
-  [rn/view {:style (styles/container-style {:outgoing outgoing})}
+(defn picker [{:keys [outgoing actions own-reactions on-close send-emoji timeline]}]
+  [rn/view {:style (styles/container-style {:outgoing outgoing :timeline timeline})}
    [rn/view {:style (styles/reactions-picker-row)}
     (doall
      (for [[id resource] constants/reactions
@@ -55,7 +55,8 @@
             actions        :actions
             send-emoji     :sendEmoji
             own-reactions  :ownReactions
-            children       :children}
+            children       :children
+            timeline       :timeline}
            (bean/bean props)
            {bottom-inset :bottom}  (safe-area/use-safe-area)
            {window-height :height} (rn/use-window-dimensions)
@@ -93,12 +94,14 @@
           [animated/view {:on-layout      on-picker-layout
                           :pointer-events :box-none
                           :style          (merge (styles/picker-wrapper-style {:display-photo? display-photo
+                                                                               :timeline       timeline
                                                                                :outgoing       outgoing})
                                                  {:opacity   animation
                                                   :transform [{:translateX (animated/mix spring translation-x 0)}
                                                               {:translateY (animated/mix spring translate-y 0)}
                                                               {:scale (animated/mix spring scale 1)}]})}
            [picker {:outgoing      outgoing
+                    :timeline      timeline
                     :actions       actions
                     :on-close      on-close
                     :own-reactions (into #{} (js->clj own-reactions))
