@@ -100,6 +100,9 @@ in stdenv.mkDerivation rec {
     # Ensure we have the right .env file
     cp -bf ./${envFileName} ./.env
 
+    # Source .env to make them avaiable durign build
+    source ./.env
+
     # Copy index.js and app/ input files
     cp -ra --no-preserve=ownership ${builtJsBundle}/* ./
 
@@ -133,7 +136,7 @@ in stdenv.mkDerivation rec {
   '';
   buildPhase = let
     adhocEnvVars = optionalString stdenv.isLinux
-      "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${makeLibraryPath [ pkgs.zlib ]}";
+      "GOOGLE_FREE=1 LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${makeLibraryPath [ pkgs.zlib ]}";
   in 
     assert ANDROID_ABI_SPLIT != null && ANDROID_ABI_SPLIT != "";
     assert stringLength ANDROID_ABI_INCLUDE > 0;

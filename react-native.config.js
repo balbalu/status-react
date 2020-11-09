@@ -1,4 +1,4 @@
-const rndi = process.env.GOOGLE_FREE ? {platforms: {android: null}} : {};
+const rndi = process.env.GOOGLE_FREE == 1 ? {platforms: {android: null}} : {};
 
 module.exports = {
     dependencies: {
