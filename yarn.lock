@@ -1222,10 +1222,10 @@
     eventemitter3 "^1.2.0"
     lodash "^4.17.15"
 
-"@react-native-community/cameraroll@^1.6.1":
-  version "1.6.2"
-  resolved "https://registry.yarnpkg.com/@react-native-community/cameraroll/-/cameraroll-1.6.2.tgz#a4dedcf8ba7bc938f805dd07dd43a275edb1f411"
-  integrity sha512-5R/2Tpi7APoNBDmRV23OcRIN9YiaRMJAHrXkGDpj7jVo2yQpJCCrARnZ9qhJ9dYEMybdP/XhXI1vVjuad5xqNQ==
+"@react-native-community/cameraroll@^1.8.1":
+  version "1.8.1"
+  resolved "https://registry.yarnpkg.com/@react-native-community/cameraroll/-/cameraroll-1.8.1.tgz#cf0efd3f963a53448ca246c186c273d3675731e5"
+  integrity sha512-5omI11UUNGpNFPmaE/TQVARFdP+ZvxiTl3rLluGS4raqvPVqz5C8ETVVKCnGk8FjVhuc/7CdfAkC6mvokAsAcw==
 
 "@react-native-community/cli-debugger-ui@^4.8.0":
   version "4.8.0"
