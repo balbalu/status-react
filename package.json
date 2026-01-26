@@ -34,7 +34,7 @@
     "qrcode": "^1.4.1",
     "react": "16.13.0",
     "react-dom": "^16.4.2",
-    "react-native": "0.62.2",
+    "react-native": "0.69.12",
     "react-native-background-timer": "^2.1.1",
     "react-native-camera-kit": "^8.0.4",
     "react-native-config": "git+https://github.com/status-im/react-native-config.git#v0.11.2-3-status",
@@ -64,7 +64,7 @@
     "react-native-touch-id": "^4.4.1",
     "react-native-webview": "git+https://github.com/status-im/react-native-webview.git#v10.9.2",
     "tdigest": "^0.1.1",
-    "web3-utils": "^1.2.1"
+    "web3-utils": "^1.6.0"
   },
   "devDependencies": {
     "@babel/generator": "7.0.0",
